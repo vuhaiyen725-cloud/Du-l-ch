@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>English Campus Tour Guide - Webkit Speech</title>
+    <style>
+        :root {
+            --primary-color: #2b6cb0;
+            --primary-hover: #2c5282;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --accent-color: #dd6b20;
+            --success-color: #38a169;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .app-container {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            margin-top: 10px;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .media-container {
+            width: 100%;
+            height: 220px;
+            background-color: #edf2f7;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .character-bubble {
+            background: #ebf8ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 12px;
+        }
+
+        .character-name {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .story-text {
+            font-size: 1rem;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .interaction-panel {
+            background: #fffaf0;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: left;
+            margin-bottom: 16px;
+            border: 1px dashed #feebc8;
+        }
+
+        .interaction-panel p {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #dd6b20;
+            font-size: 0.9rem;
+        }
+
+        .option-line {
+            margin: 8px 0;
+            font-size: 0.95rem;
+            color: #4a5568;
+            padding-left: 15px;
+            position: relative;
+            line-height: 1.3;
+        }
+
+        .option-line::before {
+            content: "•";
+            color: var(--accent-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .voice-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.05rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(43, 108, 176, 0.15);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voice-btn:active {
+            background-color: var(--primary-hover);
+            transform: scale(0.98);
+        }
+
+        .voice-btn:disabled {
+            background-color: #cbd5e0;
+            box-shadow: none;
+        }
+
+        .restart-btn {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .status-box {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: #f7fafc;
+            width: 100%;
+        }
+
+        .status-active {
+            color: var(--accent-color);
+            font-weight: 600;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-success { color: var(--success-color); font-weight: 600; }
+        .status-error { color: #e53e3e; font-weight: 600; }
+
+        .transcript-zone {
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .transcript-text { font-weight: bold; color: #e53e3e; }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>🎙️ Campus Tour Guide</h1>
+        <p>Luyện nói tiếng Anh tương tác rẽ nhánh</p>
+    </header>
+    
+    <div class="media-container">
+        <img id="scenery-img" src="cong_dh.jpg" alt="Campus">
+    </div>
+
+    <div class="character-bubble">
+        <div class="character-name">David (Visitor)</div>
+        <div id="story" class="story-text">...</div>
+    </div>
+
+    <div class="interaction-panel" id="interaction-box">
+        <p>🔊 Nhấn nút dưới rồi đọc TO câu gợi ý:</p>
+        <div id="options-list">
+            </div>
+    </div>
+
+    <div class="controls">
+        <button id="start-btn" class="voice-btn">
+            <span id="btn-icon">🎙️</span> <span id="btn-text">Bắt đầu nói (Chạm để nói)</span>
+        </button>
+        <button class="restart-btn" onclick="resetGame()">Chơi lại từ đầu</button>
+    </div>
+    
+    <div class="status-box">
+        <div id="status-text">Sẵn sàng. Hãy cấp quyền truy cập Micro khi được hỏi.</div>
+        <div class="transcript-zone">Hệ thống nghe được: <span id="transcript-text" class="transcript-text">...</span></div>
+    </div>
+</div>
+
+<script>
+    // Cơ sở dữ liệu kịch bản và đường dẫn ảnh local trên GitHub
+    const scriptTree = {
+        'start': {
+            text: 'David: "Hi there! Thanks for meeting me. Wow, the weather in Vietnam is so hot today, I\'m super thirsty. Can we get something to drink first?"',
+            img: 'cong_dh.jpg',
+            keywords: {
+                'cafeteria': 'cafeteria_scene',
+                'convenience': 'store_scene',
+                'store': 'store_scene'
+            },
+            options: [
+                "Let's go to the cafeteria",
+                "Let's go to the convenience store"
+            ]
+        },
+        'cafeteria_scene': {
+            text: 'David: "Ah, the cafeteria is so lively! This traditional Vietnamese iced milk coffee (Cà phê sữa đá) looks amazing. Let me try it... Wow, it is strong and delicious! I feel refreshed now. Where should we go next?"',
+            img: 'cang_tin.jpg',
+            keywords: {
+                'library': 'library_scene',
+                'mushroom': 'mushroom_scene',
+                'farm': 'mushroom_scene'
+            },
+            options: [
+                "We can go to the library now",
+                "We can go to the mushroom farm"
+            ]
+        },
+        'store_scene': {
+            text: 'David: "Great, this convenience store has good air conditioning! I will grab a bottle of cold water. Ah, that feels much better! I\'m ready to continue the tour. What\'s next on the list?"',
+            img: 'cua_hang.png',
+            keywords: {
+                'library': 'library_scene',
+                'mushroom': 'mushroom_scene',
+                'farm': 'mushroom_scene'
+            },
+            options: [
+                "Let's go to the library next",
+                "Let's go to the mushroom farm next"
+            ]
+        },
+        'library_scene': {
+            text: 'David: "Shh... we need to be quiet, right? Wow, this library is so big and modern. There are so many students studying hard here. Thank you for this wonderful campus tour!" 📚🎉',
+            img: 'thu_vien.jpg',
+            keywords: {}, 
+            options: []
+        },
+        'mushroom_scene': {
+            text: 'David: "Unbelievable! A mushroom farm inside a university? Seeing how students grow these organic mushrooms is the coolest thing ever. This tour was full of surprises. Thanks a lot!" 🍄🎉',
+            img: 'khu_nam.jpg',
+            keywords: {}, 
+            options: []
+        }
+    };
+
+    let currentStage = 'start';
+
+    // Gọi chính xác API webkitSpeechRecognition tích hợp trong nhân trình duyệt
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (!SpeechRecognition) {
+        alert("Thiết bị này cần mở bằng Google Chrome (Android) hoặc Safari (iPhone) để dùng chức năng nhận diện giọng nói!");
+    } else {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US'; // Chế độ nhận diện Tiếng Anh chuẩn
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+    }
+
+    const startBtn = document.getElementById('start-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
+    const statusText = document.getElementById('status-text');
+    const transcriptText = document.getElementById('transcript-text');
+    const sceneryImg = document.getElementById('scenery-img');
+    const storyText = document.getElementById('story');
+    const optionsList = document.getElementById('options-list');
+    const interactionBox = document.getElementById('interaction-box');
+
+    // Cấu hình các sự kiện cho bộ nhận diện Webkit Speech
+    if (recognition) {
+        startBtn.addEventListener('click', () => {
+            try {
+                recognition.start();
+            } catch(e) {
+                console.log("Hệ thống nhận diện đang hoạt động.");
+            }
+        });
+
+        // Trạng thái khi mic bắt đầu thu âm
+        recognition.onstart = () => {
+            statusText.className = "status-active";
+            statusText.innerText = "🎙️ Đang nghe... Hãy đọc to câu thoại gợi ý bằng tiếng Anh.";
+            btnText.innerText = "Hệ thống đang lắng nghe...";
+            btnIcon.innerText = "🛑";
+            startBtn.disabled = true;
+        };
+
+        // Khi người học ngừng nói
+        recognition.onspeechend = () => {
+            recognition.stop();
+            startBtn.disabled = false;
+            btnText.innerText = "Bắt đầu nói (Chạm để nói)";
+            btnIcon.innerText = "🎙️";
+        };
+
+        // Xử lý chuỗi văn bản sau khi mic nhận diện thành công
+        recognition.onresult = (event) => {
+            const resultText = event.results[0][0].transcript.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").trim();
+            transcriptText.innerText = `"${event.results[0][0].transcript}"`;
+            
+            let isMatched = false;
+            const currentKeywords = scriptTree[currentStage].keywords;
+
+            // Thuật toán quét so khớp từ khóa cốt lõi (Tăng độ chính xác trên thiết bị di động)
+            for (let key in currentKeywords) {
+                if (resultText.includes(key)) {
+                    currentStage = currentKeywords[key];
+                    updateApplicationState();
+                    isMatched = true;
+                    break;
+                }
+            }
+
+            if (isMatched) {
+                statusText.className = "status-success";
+                statusText.innerText = "✅ Nhận diện chính xác! Đã tự động đổi cảnh ảnh.";
+            } else {
+                statusText.className = "status-error";
+                statusText.innerText = "❌ Chưa khớp câu thoại gợi ý. Bạn hãy đọc lại rõ ràng hơn nhé!";
+            }
+        };
+
+        // Báo lỗi thiết bị đầu vào (Micro bị chặn hoặc ngắt kết nối giữa chừng)
+        recognition.onerror = (event) => {
+            startBtn.disabled = false;
+            btnText.innerText = "Bắt đầu nói (Chạm để nói)";
+            btnIcon.innerText = "🎙️";
+            statusText.className = "status-error";
+            statusText.innerText = "Lỗi kết nối Micro: " + event.error;
+        };
+    }
+
+    // Hàm cập nhật giao diện hiển thị hình ảnh và câu thoại gợi ý tương ứng từng màn
+    function updateApplicationState() {
+        const stage = scriptTree[currentStage];
+        storyText.innerText = stage.text;
+        sceneryImg.src = stage.img;
+        optionsList.innerHTML = '';
+        
+        if (stage.options && stage.options.length > 0) {
+            interactionBox.style.display = 'block';
+            startBtn.style.display = 'inline-flex';
+            
+            stage.options.forEach(option => {
+                const div = document.createElement('div');
+                div.className = 'option-line';
+                div.innerHTML = `👉 <strong>${option}</strong>`;
+                optionsList.appendChild(div);
+            });
+        } else {
+            // Trường hợp kết thúc màn chơi (Endings)
+            interactionBox.innerHTML = `<p style="color: var(--success-color); text-align:center; margin-bottom:0; font-weight:bold;">🎉 Bạn đã kết thúc chuyến dẫn tour xuất sắc!</p>`;
+            startBtn.style.display = 'none';
+            statusText.className = "status-success";
+            statusText.innerText = "Chuyến tham quan kết thúc.";
+        }
+    }
+
+    // Thiết lập tính năng chơi lại từ đầu (Reset)
+    function resetGame() {
+        currentStage = 'start';
+        transcriptText.innerText = "...";
+        statusText.className = "";
+        statusText.innerText = "Sẵn sàng. Nhấn nút để kích hoạt microphone.";
+        updateApplicationState();
+    }
+
+    // Đảm bảo dữ liệu hiển thị NGAY LẬP TỨC khi màn hình vừa tải xong
+    window.addEventListener('DOMContentLoaded', () => {
+        updateApplicationState();
+
+        // THÊM CODE PHÁT AUDIO DAVID.WAV
+        const introAudio = new Audio('david.wav');
+        introAudio.play().catch(() => {
+            // Xử lý khi cơ chế bảo mật Autoplay của trình duyệt chặn âm thanh tự động phát
+            const playAudioOnInteraction = () => {
+                introAudio.play();
+                document.removeEventListener('click', playAudioOnInteraction);
+                document.removeEventListener('touchstart', playAudioOnInteraction);
+            };
+            document.addEventListener('click', playAudioOnInteraction);
+            document.addEventListener('touchstart', playAudioOnInteraction);
+        });
+    });
+</script>
+
+</body>
+</html>
